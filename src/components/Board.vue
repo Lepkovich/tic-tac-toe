@@ -1,16 +1,40 @@
 <script setup>
   import Cell from './Cell.vue';
   import {ref} from "vue";
+  import gameProcess from "../utils/game-process";
 
   const board = ref([
-    ['', 'o', ''],
     ['', '', ''],
-    ['x', '', '']
+    ['', '', ''],
+    ['', '', '']
   ]);
 
 
   function doMoveHandler(i, j, value) {
     board.value[i][j] = value;
+
+    if (gameProcess.checkPlayerWin(board.value, 'x')) {
+      // user win
+      alert('user win');
+    } else {
+      botMove();
+    }
+  }
+
+  function botMove() {
+    setTimeout(() => {
+      const botMoving = gameProcess.botMoving(board.value);
+      if (botMoving) {
+        board.value[botMoving.i][botMoving.j] = 'o';
+        if (gameProcess.checkPlayerWin(board.value, 'o')) {
+          // bot win
+          alert('bot win');
+        }
+      }  else {
+        //draw
+        alert('draw');
+      }
+    }, 300)
   }
 
 </script>
