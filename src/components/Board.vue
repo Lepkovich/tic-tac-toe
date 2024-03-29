@@ -9,33 +9,50 @@
     ['', '', '']
   ]);
 
+  let locked = false;
+
+  const emit = defineEmits(['end'])
 
   function doMoveHandler(i, j, value) {
+
+    if(locked) return true;
     board.value[i][j] = value;
 
     if (gameProcess.checkPlayerWin(board.value, 'x')) {
-      // user win
-      alert('user win');
+      emit('end', 'user');
     } else {
       botMove();
     }
   }
 
   function botMove() {
+    locked = true;
     setTimeout(() => {
       const botMoving = gameProcess.botMoving(board.value);
       if (botMoving) {
         board.value[botMoving.i][botMoving.j] = 'o';
         if (gameProcess.checkPlayerWin(board.value, 'o')) {
-          // bot win
-          alert('bot win');
+          emit('end', 'bot');
         }
       }  else {
-        //draw
-        alert('draw');
+        emit('end', 'draw');
       }
+      locked = false;
     }, 300)
   }
+
+  function endGame() {
+    setTimeout(() => {
+      // clear board
+      board.value = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ]
+    }, 300)
+  }
+
+  defineExpose({endGame});
 
 </script>
 

@@ -19,6 +19,15 @@
 
 <style scoped>
 
+@keyframes appear {
+  from {
+    transform: scale(0.3);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 .square {
   width: 100px;
   height: 100px;
@@ -34,6 +43,8 @@
   justify-content: center;
   width: 100px;
   height: 100px;
+  animation: appear .2s cubic-bezier(0.5, 1.8, 0.1, 1.1);
+  transform: translate3d(0, 0, 0);
 }
 
 .square .x::before,
