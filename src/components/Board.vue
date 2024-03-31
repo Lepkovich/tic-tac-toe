@@ -23,12 +23,33 @@ function doMoveHandler(i, j, value) {
   board.value[i][j] = value; //ставим Х или O в координаты i, j
   moveCount++; //считаем ходы (нечетные - Х, четные - O)
 
-  if (gameProcess.checkPlayerWin(board.value, 'x')) {
+  // if (gameProcess.checkPlayerWin(board.value, 'x')) {
+  //   emit('end', 'user');
+  // } else if (gameProcess.checkPlayerWin(board.value, 'o')) {
+  //   emit('end', 'user2');
+  // } else if (props.isBotPlaying) {
+  //   botMove();
+  // }
+
+  const result = gameProcess.checkPlayerWin(board.value, 'x');
+  if (result.win) {
+    console.log(result.combination);
+    //draw result.combination
     emit('end', 'user');
-  } else if (gameProcess.checkPlayerWin(board.value, 'o')) {
-    emit('end', 'user2');
-  } else if (props.isBotPlaying) {
-    botMove();
+  } else {
+    const result2 = gameProcess.checkPlayerWin(board.value, 'o');
+    if (result2.win) {
+      console.log(result2.combination);
+      //draw result2.combination
+      emit('end', 'user2');
+    } else {
+      if (props.isBotPlaying) {
+        botMove();
+      }
+    }
+  }
+  if (moveCount === 10) {
+    emit('end', 'draw');
   }
 }
 
@@ -38,7 +59,10 @@ function botMove() {
     const botMoving = gameProcess.botMoving(board.value);
     if (botMoving) {
       board.value[botMoving.i][botMoving.j] = 'o';
-      if (gameProcess.checkPlayerWin(board.value, 'o')) {
+      const result = gameProcess.checkPlayerWin(board.value, 'o');
+      if (result.win) {
+        console.log(result.combination);
+        //draw result.combination
         emit('end', 'bot');
       }
     } else {

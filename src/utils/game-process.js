@@ -31,24 +31,24 @@ export default {
     checkPlayerWin(board, sign) {
         for (let i = 0; i < 3; i++) {
             if (board[0][i] === sign && board[1][i] === sign && board[2][i] === sign) {
-                return true;
+                return {win: true, combination: [[0, i], [1, i], [2, i]]};
             }
         }
 
         for (let i = 0; i < 3; i++) {
             if (board [i][0] === sign && board [i][1] === sign && board [i][2] === sign) {
-                return true;
+                return {win: true, combination: [[i, 0], [i, 1], [i, 2]]};
             }
         }
 
         if (board[0][0] === sign && board[1][1] === sign && board[2][2] === sign) {
-            return true;
+            return {win: true, combination: [[0, 0], [1, 1], [2, 2]]};
         }
 
         if (board[0][2] === sign && board[1][1] === sign && board[2][0] === sign) {
-            return true;
+            return {win: true, combination: [[0, 2], [1, 1], [2, 0]]};
         }
 
-        return false;
+        return {win:false, combination: null};
     }
 }
