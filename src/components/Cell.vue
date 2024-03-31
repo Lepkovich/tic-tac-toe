@@ -1,10 +1,14 @@
 <script setup>
-  const props = defineProps(['value']);
+  const props = defineProps(['value', 'isBotPlaying', 'moveCount']);
   const emit = defineEmits(['doMove']);
 
   function cellClick() {
     if (!props.value) {
-      emit('doMove', 'x')
+      if (!props.isBotPlaying && props.moveCount % 2 === 0) {
+        emit('doMove', 'o')
+      } else {
+        emit('doMove', 'x')
+      }
     }
   }
 </script>

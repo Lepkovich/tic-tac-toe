@@ -6,9 +6,12 @@
 
   const score = ref({
     user: 0,
+    user2: 0,
     bot: 0,
     draw: 0,
   });
+
+  const isBotPlaying = ref(false);
 
   const childBoard = ref(null);
   const isPopupVisible = ref(false);
@@ -18,7 +21,11 @@
     switch (winner) {
       case 'user':
         score.value.user++;
-        gameResult.value = 'Вы победили!';
+        gameResult.value = 'Победил игрок X!';
+        break;
+      case 'user2':
+        score.value.user2++;
+        gameResult.value = 'Победил игрок O!';
         break;
       case 'bot':
         score.value.bot++;
@@ -52,9 +59,18 @@
   <div class="title">
     Крестики-нолики
   </div>
+  <div class="game-mode">
+    <el-switch
+        v-model="isBotPlaying"
+        class="mb-2"
+        active-text="компьютер"
+        inactive-text="соперник"
+        @click="onClosePopup"
+    />
+  </div>
   <div class="game">
-    <Board @end="endHandler" ref="childBoard"/>
-    <Score :score="score"/>
+    <Board @end="endHandler" ref="childBoard" :is-bot-playing="isBotPlaying"/>
+    <Score :score="score" :is-bot-playing="isBotPlaying"/>
   </div>
   <Modal v-model:visible="isPopupVisible" @onUnVisible="onClosePopup" :type="'clean'" :modalClass="'popup'">
     <span class="close" @click="closePopup">&times;</span>
@@ -66,10 +82,23 @@
 <style>
   .title {
     font-size: 40px;
-    color: white;
+    text-transform: uppercase;
+    color: #409EFF;
     text-align: center;
     margin-top: 50px;
+    margin-bottom: 30px;
   }
+   .game-mode {
+     max-width: 324px;
+     margin: 0 auto;
+     display: flex;
+     justify-content: center;
+   }
+
+   .game-mode .el-switch.mb-2 span {
+      font-size: 20px;
+     text-transform: uppercase;
+   }
   .game {
     margin: 50px auto;
     max-width: 324px;

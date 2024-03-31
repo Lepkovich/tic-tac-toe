@@ -1,6 +1,6 @@
 # Vue game tic-tac-toe
 
-This game is a part of Front-End course by ITlogia.
+Here I improve the game by adding player with player mode.
 
 ## Project Setup
 
