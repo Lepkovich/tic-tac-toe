@@ -35,11 +35,13 @@ function doMoveHandler(i, j, value) {
   } else {
     if (props.isBotPlaying) {
       botMove();
+    } else {
+      if (moveCount === 10) {
+        emit('end', 'draw');
+      }
     }
   }
-  if (moveCount === 10) {
-    emit('end', 'draw');
-  }
+
 }
 
 function botMove() {
