@@ -10,42 +10,31 @@ const board = ref([
 ]);
 
 const props = defineProps(['isBotPlaying']);
+const emit = defineEmits(['end']);
 
 
 let locked = false;
 let moveCount = ref(1);
+const result = ref({ win: false, winningCombination: [] });
 
-const emit = defineEmits(['end'])
 
 function doMoveHandler(i, j, value) {
 
-  if (locked) return true; //не можем кликнуть пока ходит бот
-  board.value[i][j] = value; //ставим Х или O в координаты i, j
-  moveCount++; //считаем ходы (нечетные - Х, четные - O)
+  if (locked) return true; // waiting while bot moving
+  board.value[i][j] = value; // make player move
+  moveCount++; // making counts (odd - Х, even - O)
 
-  // if (gameProcess.checkPlayerWin(board.value, 'x')) {
-  //   emit('end', 'user');
-  // } else if (gameProcess.checkPlayerWin(board.value, 'o')) {
-  //   emit('end', 'user2');
-  // } else if (props.isBotPlaying) {
-  //   botMove();
-  // }
 
-  const result = gameProcess.checkPlayerWin(board.value, 'x');
-  if (result.win) {
-    console.log(result.combination);
-    //draw result.combination
-    emit('end', 'user');
-  } else {
-    const result2 = gameProcess.checkPlayerWin(board.value, 'o');
-    if (result2.win) {
-      console.log(result2.combination);
-      //draw result2.combination
-      emit('end', 'user2');
+  result.value = gameProcess.checkPlayerWin(board.value, value);
+  if (result.value.win) {
+    if (value === 'x') {
+      emit('end', 'user');
     } else {
-      if (props.isBotPlaying) {
-        botMove();
-      }
+      emit('end', 'user2');
+    }
+  } else {
+    if (props.isBotPlaying) {
+      botMove();
     }
   }
   if (moveCount === 10) {
@@ -59,13 +48,12 @@ function botMove() {
     const botMoving = gameProcess.botMoving(board.value);
     if (botMoving) {
       board.value[botMoving.i][botMoving.j] = 'o';
-      const result = gameProcess.checkPlayerWin(board.value, 'o');
-      if (result.win) {
-        console.log(result.combination);
-        //draw result.combination
+      result.value = gameProcess.checkPlayerWin(board.value, 'o');
+      if (result.value.win) {
         emit('end', 'bot');
       }
-    } else {
+    }
+    else {
       emit('end', 'draw');
     }
     locked = false;
@@ -84,6 +72,14 @@ function endGame() {
   }, 300)
 }
 
+function isCellPartOfWinningCombination(i, j) {
+  if (result.value.win) {
+    const combination = result.value.winningCombination;
+    return combination.some(coord => coord[0] === i && coord[1] === j);
+  }
+  return false;
+}
+
 defineExpose({endGame});
 
 </script>
@@ -93,7 +89,9 @@ defineExpose({endGame});
     <template v-for="(iValue, i) in board">
       <template v-for="(jValue, j) in iValue">
         <Cell :value="jValue" :is-bot-playing="isBotPlaying" :moveCount="moveCount"
+              :is-winning-cell="isCellPartOfWinningCombination(i, j)"
               @do-move="(value) => doMoveHandler(i, j, value)"/>
+
       </template>
     </template>
   </div>

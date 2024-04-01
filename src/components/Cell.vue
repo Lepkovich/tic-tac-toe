@@ -1,5 +1,5 @@
 <script setup>
-  const props = defineProps(['value', 'isBotPlaying', 'moveCount']);
+  const props = defineProps(['value', 'isBotPlaying', 'moveCount', 'isWinningCell']);
   const emit = defineEmits(['doMove']);
 
   function cellClick() {
@@ -15,7 +15,7 @@
 
 <template>
 
-  <div class="square" @click="cellClick">
+  <div class="square" @click="cellClick" :class="{ 'win-line': props.isWinningCell }">
     <div :class="props.value"></div>
   </div>
 
@@ -60,6 +60,11 @@
   background-color: white;
 }
 
+.square.win-line .x::before,
+.square.win-line .x::after {
+  background-color: red;
+}
+
 .square .x::before {
   transform: rotate(45deg);
 }
@@ -74,5 +79,9 @@
   height: 50px;
   border-radius: 50%;
   border: 10px solid white;
+}
+
+.square.win-line .o::before {
+  border: 10px solid red;
 }
 </style>
