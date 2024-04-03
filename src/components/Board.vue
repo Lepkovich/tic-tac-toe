@@ -47,7 +47,8 @@ function doMoveHandler(i, j, value) {
 function botMove() {
   locked = true;
   setTimeout(() => {
-    const botMoving = gameProcess.botMoving(board.value);
+    const botMoving = gameProcess.bestMove(board.value);
+    // const botMoving = gameProcess.botRandomMoving(board.value);
     if (botMoving) {
       board.value[botMoving.i][botMoving.j] = 'o';
       result.value = gameProcess.checkPlayerWin(board.value, 'o');
