@@ -4,6 +4,8 @@ let score = {
     tie: 0
 };
 
+let scoreArr = [];
+
 export default {
     botRandomMoving(board) {
         const availableCells = this.checkAvailableCells(board);
@@ -58,17 +60,40 @@ export default {
         return {win: false, winningCombination: null};
     },
 
+    setTrainBoard(i, j, score) {
+        scoreArr.push({i, j, score});
+    },
 
-    bestMove(board) {
+    getTrainBoard() {
+        const colorMap = {
+            10: 'green',
+            0: 'yellow',
+            '-10': 'red'
+        };
+
+        return scoreArr.map(item => {
+            const color = colorMap[item.score] || ''; // Если значения нет в colorMap, используем пустую строку
+            return {...item, score: color};
+        });
+    },
+
+    bestMove(board, sign) {
         // AI to make its turn
         let bestScore = -Infinity;
+        scoreArr = [];
         let move;
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board[i].length; j++) {
                 if (board[i][j] === '') {
-                    board[i][j] = 'o';
-                    let score = this.minimax(board, 0, false);
+                    board[i][j] = sign;
+                    // let isMaximizing = false;
+                    // if (sign === 'x') {
+                    //     isMaximizing = true;
+                    // }
+                    let score = this.minimax(board, 0, false, sign); //было false
                     board[i][j] = '';
+                    // console.log('координаты: i:' + i + ', j: ' + j + '. Score: ' + score)
+                    this.setTrainBoard(i, j, score);
                     if (score > bestScore) {
                         bestScore = score;
                         move = {i, j};
@@ -87,7 +112,7 @@ export default {
     },
 
 
-    minimax(board, depth, isMaximizing) {
+    minimax(board, depth, isMaximizing, sign) {
         let result = this.checkWinner(board);
         if (result != null) {
             return score[result];
@@ -99,10 +124,16 @@ export default {
                 for (let j = 0; j < 3; j++) {
                     // Is the spot available?
                     if (board[i][j] === '') {
-                        board[i][j] = 'o';
-                        let score = this.minimax(board, depth + 1, false);
+                        let nextMove = 'o'
+                        if (sign === 'x') {
+                            nextMove = 'x';
+                        }
+                        board[i][j] = nextMove; // был o
+                        let score = this.minimax(board, depth + 1, false, sign);
                         board[i][j] = '';
-                        bestScore = Math.max(score, bestScore);
+                        bestScore = nextMove === 'o' ? Math.max(score, bestScore) : Math.min(score, bestScore);
+
+                        // bestScore = Math.max(score, bestScore);
                     }
                 }
             }
@@ -113,10 +144,16 @@ export default {
                 for (let j = 0; j < 3; j++) {
                     // Is the spot available?
                     if (board[i][j] === '') {
-                        board[i][j] = 'x';
-                        let score = this.minimax(board, depth + 1, true);
+                        let nextMove = 'x';
+                        if (sign === 'x') {
+                            nextMove = 'o';
+                        }
+                        board[i][j] = nextMove; //был x
+                        let score = this.minimax(board, depth + 1, true, sign);
                         board[i][j] = '';
-                        bestScore = Math.min(score, bestScore);
+                        bestScore = nextMove === 'x' ? Math.min(score, bestScore) : Math.max(score, bestScore);
+                        // всегда Infinity  - исправить логику
+                        // bestScore = Math.min(score, bestScore);
                     }
                 }
             }

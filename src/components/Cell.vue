@@ -1,5 +1,6 @@
 <script setup>
-  const props = defineProps(['value', 'isBotPlaying', 'moveCount', 'isWinningCell']);
+
+const props = defineProps(['value', 'isBotPlaying', 'moveCount', 'isWinningCell', 'cellColor']);
   const emit = defineEmits(['doMove']);
 
   function cellClick() {
@@ -11,16 +12,17 @@
       }
     }
   }
+
 </script>
 
 <template>
 
-  <div class="square" @click="cellClick" :class="{ 'win-line': props.isWinningCell }">
+  <div class="square" @click="cellClick"
+       :class="[{ 'win-line': props.isWinningCell, 'empty-cell': props.isCellEmpty }, props.cellColor]">
     <div :class="props.value"></div>
   </div>
 
 </template>
-
 <style scoped>
 
 @keyframes appear {
@@ -38,6 +40,20 @@
   border: 3px solid #d0d0d0;
   cursor: pointer;
   position: relative;
+}
+
+.square.empty-cell {
+  background-color: #409eff;
+}
+.square.red {
+  background-color: red;
+}
+.square.yellow {
+  background-color: yellow;
+}
+
+.square.green {
+  background-color: green;
 }
 
 .square .x,

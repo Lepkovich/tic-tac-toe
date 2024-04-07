@@ -9,13 +9,14 @@ const board = ref([
   ['', '', '']
 ]);
 
-const props = defineProps(['isBotPlaying']);
+const props = defineProps(['isBotPlaying', 'withMinimax', 'trainingMode']);
 const emit = defineEmits(['end']);
-
+let botMoving = [];
+let trainingBoard = [];
 
 let locked = false;
 let moveCount = ref(1);
-const result = ref({ win: false, winningCombination: [] });
+const result = ref({win: false, winningCombination: []});
 
 
 function doMoveHandler(i, j, value) {
@@ -32,39 +33,61 @@ function doMoveHandler(i, j, value) {
     } else {
       emit('end', 'user2');
     }
-  } else {
-    if (props.isBotPlaying) {
-      botMove();
-    } else {
-      if (moveCount === 10) {
-        emit('end', 'draw');
-      }
-    }
+  } else if (props.isBotPlaying || props.trainingMode) {
+    botMove(value);
+  }
+  if (moveCount === 10) {
+    emit('end', 'draw');
   }
 
 }
 
-function botMove() {
+function botMove(value) {
   locked = true;
   setTimeout(() => {
-    const botMoving = gameProcess.bestMove(board.value);
-    // const botMoving = gameProcess.botRandomMoving(board.value);
-    if (botMoving) {
-      board.value[botMoving.i][botMoving.j] = 'o';
-      result.value = gameProcess.checkPlayerWin(board.value, 'o');
-      if (result.value.win) {
-        emit('end', 'bot');
+    if (props.trainingMode) {
+      let nextMove = 'x';
+      if (value === 'x') {
+        nextMove = 'o'
+      }
+      botMoving = gameProcess.bestMove(board.value, nextMove);
+      trainingBoard = gameProcess.getTrainBoard();
+    } else {
+      if (props.withMinimax) {
+        botMoving = gameProcess.bestMove(board.value, 'o');
+      } else {
+        botMoving = gameProcess.botRandomMoving(board.value);
+      }
+      if (botMoving && botMoving.length !== 0) {
+        board.value[botMoving.i][botMoving.j] = 'o';
+        result.value = gameProcess.checkPlayerWin(board.value, 'o');
+        if (result.value.win) {
+          emit('end', 'bot');
+        }
+      } else {
+        emit('end', 'draw');
       }
     }
-    else {
-      emit('end', 'draw');
-    }
+
     locked = false;
   }, 300)
 }
 
+function cellColor(i, j) {
+  if (trainingBoard && trainingBoard.length > 0) {
+    const foundItem = trainingBoard.find((cell) => cell.i === i && cell.j === j);
+    if (foundItem) {
+      return foundItem.score || ''; // Возвращаем цвет
+    }
+  }
+
+  return false; // Возвращаем пустую строку, если не найден элемент или не используется withMinimax
+}
+
 function endGame() {
   moveCount = 1;
+  result.winningCombination = [];
+  trainingBoard = [];
   setTimeout(() => {
     // clear board
     board.value = [
@@ -83,6 +106,15 @@ function isCellPartOfWinningCombination(i, j) {
   return false;
 }
 
+// function isCellEmpty(i, j) {
+//   if (!props.trainingMode) {
+//     const emptyCell = gameProcess.checkAvailableCells(board.value);
+//     return emptyCell.find((cell) => cell.i === i && cell.j === j)
+//   }
+//   return false;
+// }
+
+
 defineExpose({endGame});
 
 </script>
@@ -93,6 +125,7 @@ defineExpose({endGame});
       <template v-for="(jValue, j) in iValue">
         <Cell :value="jValue" :is-bot-playing="isBotPlaying" :moveCount="moveCount"
               :is-winning-cell="isCellPartOfWinningCombination(i, j)"
+              :cell-color="cellColor(i, j)"
               @do-move="(value) => doMoveHandler(i, j, value)"/>
 
       </template>
